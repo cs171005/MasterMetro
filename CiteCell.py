@@ -1,1 +1,1 @@
-# -*- coding: utf-8 -*- class CiteCell:    	def __init__(self,isStation,segmentationNumber,existTrain):		self.existTrain = existTrain		self.segmentationNumber = segmentationNumber		self.isStation = isStation		
+# -*- coding: utf-8 -*- class CiteCell:    	def __init__(self,isStation,segmentationNumber,stationNumber,existTrain):		self.existTrain = existTrain		self.segmentationNumber = segmentationNumber		self.isStation = isStation		self.stationNumber = stationNumber		
