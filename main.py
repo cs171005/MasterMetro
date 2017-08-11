@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*- 
 import csv
 import datetime
-from SiteCell import *
 from Train import *
+from LineState import *
 
-CellNumPerMinute = 8
+CellNumPerMinute = 4
 
 TrainList = []
 f = open('timetable(interval5).csv', 'rU')
@@ -22,7 +22,7 @@ f.close()
 StationNum = 19
 interStationMinutes = 3
 
-LineState = []
+LineState = LineState()
 LineState.append(SiteCell(True,0,0,False))
 for i in range(1,StationNum):
 	for j in range(0,interStationMinutes*CellNumPerMinute):
@@ -32,45 +32,46 @@ for i in range(1,StationNum):
 #Time Control
 current = datetime.datetime(100,1,1,4,50,00)
 timePerStep = datetime.timedelta(seconds=60/CellNumPerMinute) 
-end = datetime.datetime(100,1,1,5,30,00)
+end = datetime.datetime(100,1,1,7,30,00)
 
-isForward = False
+
 while current <= end:
-	for i in range(0,1):
+	for i in range(0,3):
 		if TrainList[i].CurrentStop < StationNum: #Halfway
-			# arrive
+			# ARRIVE
 			if TrainList[i].CurrentStop != -1 and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2-1].time():
-				isForward = False
+				TrainList[i].isForward = False
 			
-			# deperture (updating destination station)
+			# DEPERTURE (updating destination station)
 			if TrainList[i].CurrentStop == -1 and current.time() >= TrainList[i].TimeTable[0].time():
 			#starting depot to starting station
 					TrainList[i].CurrentStopUpdate()
 					TrainList[i].CurrentSiteUpdate()
 					TrainList[i].ConvertOperationMode()	#F->T
-					isForward = True
+					TrainList[i].isForward = True
 
-					LineState[0].existTrain = True			
+					LineState.state[0].existTrain = True			
 			elif current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
+			#deperture from stations in halfway.
 				TrainList[i].CurrentStopUpdate()
-				isForward = True
-		elif TrainList[i].CurrentStop == StationNum: #Terminal station
+				TrainList[i].isForward = True
+		elif TrainList[i].CurrentStop == StationNum: 
+		#terminal station to end-side depot
 			if current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
 				TrainList[i].CurrentStopUpdateToDepot()
 	  			TrainList[i].ConvertOperationMode() #T->F
-				isForward = False
+				TrainList[i].isForward = False
 				
-		if TrainList[i].InOperation and isForward:
-			LineState[TrainList[i].CurrentSite].existTrain = False
+		if TrainList[i].InOperation and TrainList[i].isForward:
+		#move to the next site cell (represents an inter-section)
+			LineState.state[TrainList[i].CurrentSite].existTrain = False
 			TrainList[i].CurrentSiteUpdate()
-			LineState[TrainList[i].CurrentSite].existTrain = True
+			LineState.state[TrainList[i].CurrentSite].existTrain = True
 		
-		print current.time(),TrainList[i].TrainNum,TrainList[i].CurrentStop,TrainList[i].CurrentSite,isForward
-		
+	#print current.time(),TrainList[2].TrainNum,TrainList[2].CurrentStop,TrainList[2].CurrentSite,TrainList[2].isForward	
+	LineState.OutputState(current)
 	current += timePerStep
+
+os.system('open ' + LineState.outputFile)
 	
-"""
-for i in range(0,len(LineState)):
-	print i,LineState[i].existTrain,LineState[i].isStation
-"""
 

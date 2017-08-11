@@ -4,7 +4,8 @@ class Train:
 	def __init__(self,TrainNum,TimeTable):
 		self.TrainNum = TrainNum
 		self.TimeTable = TimeTable
-		self.InOperation = False		
+		self.InOperation = False
+		self.isForward = False		
 		self.CurrentStop = -1
 		self.CurrentSite = -1
 	
