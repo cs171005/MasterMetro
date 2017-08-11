@@ -4,7 +4,7 @@ import datetime
 from SiteCell import *
 from Train import *
 
-CellNumPerMinute = 2
+CellNumPerMinute = 8
 
 TrainList = []
 f = open('timetable(interval5).csv', 'rU')
@@ -34,18 +34,41 @@ current = datetime.datetime(100,1,1,4,50,00)
 timePerStep = datetime.timedelta(seconds=60/CellNumPerMinute) 
 end = datetime.datetime(100,1,1,5,30,00)
 
+isForward = False
 while current <= end:
 	for i in range(0,1):
-		if TrainList[i].CurrentStop < StationNum:
+		if TrainList[i].CurrentStop < StationNum: #Halfway
+			# arrive
+			if TrainList[i].CurrentStop != -1 and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2-1].time():
+				isForward = False
+			
+			# deperture (updating destination station)
 			if TrainList[i].CurrentStop == -1 and current.time() >= TrainList[i].TimeTable[0].time():
-					TrainList[i].CurrentStopUpdate()				
+			#starting depot to starting station
+					TrainList[i].CurrentStopUpdate()
+					TrainList[i].CurrentSiteUpdate()
+					TrainList[i].ConvertOperationMode()	#F->T
+					isForward = True
+
+					LineState[0].existTrain = True			
 			elif current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
 				TrainList[i].CurrentStopUpdate()
-		elif TrainList[i].CurrentStop == StationNum:
+				isForward = True
+		elif TrainList[i].CurrentStop == StationNum: #Terminal station
 			if current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
-				TrainList[i].CurrentStopUpdateToDeposit()
-		print (current.time(),TrainList[i].TrainNum,TrainList[i].CurrentStop)
+				TrainList[i].CurrentStopUpdateToDepot()
+	  			TrainList[i].ConvertOperationMode() #T->F
+				isForward = False
+				
+		if TrainList[i].InOperation and isForward:
+			LineState[TrainList[i].CurrentSite].existTrain = False
+			TrainList[i].CurrentSiteUpdate()
+			LineState[TrainList[i].CurrentSite].existTrain = True
+		
+		print current.time(),TrainList[i].TrainNum,TrainList[i].CurrentStop,TrainList[i].CurrentSite,isForward
+		
 	current += timePerStep
+	
 """
 for i in range(0,len(LineState)):
 	print i,LineState[i].existTrain,LineState[i].isStation
