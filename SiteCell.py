@@ -1,0 +1,1 @@
+# -*- coding: utf-8 -*- class SiteCell:    	def __init__(self,isStation,segmentationNumber,stationNumber,existTrain):		self.existTrain = existTrain		self.segmentationNumber = segmentationNumber		self.isStation = isStation		self.stationNumber = stationNumber		

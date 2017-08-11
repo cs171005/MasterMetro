@@ -5,6 +5,7 @@ class Train:
 		self.TrainNum = TrainNum
 		self.TimeTable = TimeTable
 		self.CurrentStop = -1
+		self.CurrentSite = -1
 	
 	def CurrentStopUpdate(self):
 		self.CurrentStop += 1

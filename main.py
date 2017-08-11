@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*- 
 import csv
 import datetime
-from CiteCell import *
+from SiteCell import *
 from Train import *
 
-CellNumPerMinute = 7
+CellNumPerMinute = 2
 
 TrainList = []
 f = open('timetable(interval5).csv', 'rU')
@@ -23,11 +23,11 @@ StationNum = 19
 interStationMinutes = 3
 
 LineState = []
-LineState.append(CiteCell(True,0,0,False))
+LineState.append(SiteCell(True,0,0,False))
 for i in range(1,StationNum):
 	for j in range(0,interStationMinutes*CellNumPerMinute):
-		LineState.append(CiteCell(False,0,None,False))
-	LineState.append(CiteCell(True,0,i,False))	
+		LineState.append(SiteCell(False,0,None,False))
+	LineState.append(SiteCell(True,0,i,False))	
 
 #Time Control
 current = datetime.datetime(100,1,1,4,50,00)
@@ -46,6 +46,8 @@ while current <= end:
 				TrainList[i].CurrentStopUpdateToDeposit()
 		print (current.time(),TrainList[i].TrainNum,TrainList[i].CurrentStop)
 	current += timePerStep
-	
-
+"""
+for i in range(0,len(LineState)):
+	print i,LineState[i].existTrain,LineState[i].isStation
+"""
 
