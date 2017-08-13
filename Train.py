@@ -17,6 +17,9 @@ class Train:
 	
 	def CurrentSiteUpdate(self):
 		self.CurrentSite += 1
+
+	def CurrentSiteUpdateToDepot(self):
+		self.CurrentStop = 999
 	
 	def ConvertOperationMode(self):
 		self.InOperation = not self.InOperation
