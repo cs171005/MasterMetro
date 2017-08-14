@@ -36,8 +36,8 @@ end = datetime.datetime(100,1,1,7,30,00)
 
 
 while current <= end:
-	for i in range(0,1):
-		if TrainList[i].CurrentStop < StationNum: #Halfway
+	for i in range(0,len(TrainList)):
+		if TrainList[i].CurrentStop < StationNum-1: #Halfway
 			# ARRIVE
 			if TrainList[i].CurrentStop != -1 and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2-1].time():
 				TrainList[i].isForward = False
@@ -53,31 +53,45 @@ while current <= end:
 			#starting depot to starting station
 					TrainList[i].CurrentStopUpdate()
 					TrainList[i].CurrentSiteUpdate()
-					#TrainList[i].ConvertOperationMode()	#F->T
+					TrainList[i].ConvertOperationMode()	#F->T
 					TrainList[i].isForward = True
 
 					LineState.state[0].existTrain = True			
 			elif current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
 			#deperture from stations in halfway.
+				print 'half way'
 				TrainList[i].CurrentStopUpdate()
 				TrainList[i].isForward = True
-		elif TrainList[i].CurrentStop == StationNum: #terminal station
+		elif TrainList[i].CurrentStop == StationNum-1: #terminal station
 		# ARRIVE
 			if TrainList[i].CurrentStop != -1 and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2-1].time():
 				TrainList[i].isForward = False
+		# DEPERTURE
 		#terminal station to end-side depot
 			if current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
+				LineState.state[TrainList[i].CurrentSite].existTrain = False
 				TrainList[i].CurrentStopUpdateToDepot()
 				TrainList[i].CurrentSiteUpdateToDepot()				
 	  			TrainList[i].ConvertOperationMode() #T->F
 				TrainList[i].isForward = False
-				
+			'''
+			elif current.time() == TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
+				print 'end'
+
+				TrainList[i].CurrentStopUpdateToDepot()
+				TrainList[i].CurrentSiteUpdateToDepot()				
+				TrainList[i].ConvertOperationMode() #T->F
+				TrainList[i].isForward = False
+			'''
 		if TrainList[i].InOperation and TrainList[i].isForward and TrainList[i].CurrentSite != 999:
 		#move to the next site cell (represents an inter-section)
 			LineState.state[TrainList[i].CurrentSite].existTrain = False
 			TrainList[i].CurrentSiteUpdate()
 			LineState.state[TrainList[i].CurrentSite].existTrain = True
-		
+		'''
+		elif TrainList[i].CurrentStop == StationNum-1 and TrainList[i].CurrentSite != 999:
+			LineState.state[TrainList[i].CurrentSite].existTrain = False
+		'''			
 	print current.time(),TrainList[0].TrainNum,TrainList[0].CurrentStop,TrainList[0].CurrentSite,TrainList[0].isForward,TrainList[0].InOperation
 	LineState.OutputState(current)
 	current += timePerStep
