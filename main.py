@@ -30,13 +30,17 @@ for i in range(1,StationNum):
 	LineState.append(SiteCell(True,0,i,False))	
 
 #Time Control
-current = datetime.datetime(100,1,1,4,55,00)
+current = datetime.datetime(100,1,1,7,55,00)
 timePerStep = datetime.timedelta(seconds=60/CellNumPerMinute) 
 end = datetime.datetime(100,1,1,13,30,00)
 
+firstTrainNum = 0
+for i in range(0,len(TrainList)):
+	if (TrainList[i].TimeTable[0] - datetime.timedelta(seconds=30)).time() < current.time():
+		firstTrainNum += 1
 
 while current <= end:
-	for i in range(0,len(TrainList)):
+	for i in range(firstTrainNum,len(TrainList)):
 		if TrainList[i].CurrentStop < StationNum-1: #Halfway
 			# ARRIVE
 			if TrainList[i].CurrentStop != -1 and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2-1].time():
