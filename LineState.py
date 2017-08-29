@@ -42,6 +42,7 @@ class LineState:
 			if Site.isStation:
 				output += ']'
 		f.write(str(currentTime.time())+' '+output+'\n')
+		f.flush()
 		f.close()
 		
  
