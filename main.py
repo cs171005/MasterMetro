@@ -30,9 +30,9 @@ for i in range(1,StationNum):
 	LineState.append(SiteCell(True,0,i,False))	
 
 #Time Control
-current = datetime.datetime(100,1,1,7,55,00)
+current = datetime.datetime(100,1,1,4,55,00)
 timePerStep = datetime.timedelta(seconds=60/CellNumPerMinute) 
-end = datetime.datetime(100,1,1,13,30,00)
+end = datetime.datetime(100,1,1,8,30,00)
 
 firstTrainNum = 0
 for i in range(0,len(TrainList)):
@@ -63,8 +63,9 @@ while current <= end:
 					LineState.state[0].existTrain = True			
 			elif current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
 			#deperture from stations in halfway.
-				TrainList[i].CurrentStopUpdate()
-				TrainList[i].isForward = True
+				if LineState.state[TrainList[i].CurrentSite+1].existTrain == False: #Collision prevention
+					TrainList[i].CurrentStopUpdate()
+					TrainList[i].isForward = True
 		elif TrainList[i].CurrentStop == StationNum-1: #terminal station
 		# ARRIVE
 			if TrainList[i].CurrentStop != -1 and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2-1].time():
@@ -80,9 +81,10 @@ while current <= end:
 			
 		if TrainList[i].InOperation and TrainList[i].isForward and TrainList[i].CurrentSite != 999:
 		#move to the next site cell (represents an inter-section)
-			LineState.state[TrainList[i].CurrentSite].existTrain = False
-			TrainList[i].CurrentSiteUpdate()
-			LineState.state[TrainList[i].CurrentSite].existTrain = True
+			if LineState.state[TrainList[i].CurrentSite+1].existTrain == False: #Collision prevention
+				LineState.state[TrainList[i].CurrentSite].existTrain = False
+				TrainList[i].CurrentSiteUpdate()
+				LineState.state[TrainList[i].CurrentSite].existTrain = True
 
 	#print current.time(),TrainList[0].TrainNum,TrainList[0].CurrentStop,TrainList[0].CurrentSite,TrainList[0].isForward,TrainList[0].InOperation
 	LineState.OutputState(current)

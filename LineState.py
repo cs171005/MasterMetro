@@ -25,7 +25,9 @@ class LineState:
 		print currentTime.time(),output
 	
 	def OutputState(self,currentTime):
+		#self.outputFile = 'output'+'.txt'
 		self.outputFile = 'output'+datetime.datetime.now().strftime('%s')+'.txt'
+			
 		if os.path.exists(self.outputFile):
 			f = open(self.outputFile,'a')
 		else:
