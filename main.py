@@ -77,7 +77,7 @@ while current <= end:
 					TrainList[i].isForward = True
 
 					LineState.state[0].existTrain = True			
-			elif current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time() and current.time() >= (TrainList[i].arrive + datetime.timedelta(seconds=30)).time():
+			elif LineState.state[TrainList[i].CurrentSite].isStation and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time() and current.time() >= (TrainList[i].arrive + datetime.timedelta(seconds=30)).time():
 			#deperture from stations in halfway.
 				if LineState.state[TrainList[i].CurrentSite+1].existTrain == False: #Collision prevention
 					TrainList[i].CurrentStopUpdate()
