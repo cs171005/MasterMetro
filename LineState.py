@@ -2,12 +2,12 @@
 import os.path
 import os
 import datetime
-
+# from main import StationNum
 class LineState:
 	def __init__(self):
 		self.state = []
 		self.outputFile = ''
-		self.hopProb = [1]*StationNum #default:trains always progress.
+		self.hopProb = [1]*19 #StationNum #default:trains always progress.
 
 	def append(self,newSite):
 		self.state.append(newSite)
@@ -58,3 +58,8 @@ class SiteCell:
 		self.segmentationNumber = segmentationNumber
 		self.isStation = isStation
 		self.stationNumber = stationNumber
+		self.hopProb = 1 #default:1
+
+	def hopProbUpdate(self,HPArray):
+		if not self.isStation:
+			self.hopProb = HPArray[self.segmentationNumber]
