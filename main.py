@@ -22,6 +22,7 @@ for i,row in enumerate(reader):
 	#print TrainList[i].TimeTable
 f.close()
 
+# random.seed(1)
 #Line up SiteCell
 LineState = LineState()
 LineState.append(SiteCell(True,0,0,False))
@@ -30,15 +31,13 @@ for i in range(1,StationNum):
 		LineState.append(SiteCell(False,i,None,False)) #represents interstation
 	LineState.append(SiteCell(True,i,i,False)) #represents stations
 
-#LineState.hopProb[3] = 0.9
-print LineState.hopProb
-print LineState
+LineState.hopProb[3] = 0.75
+# print LineState.hopProb
 for site in LineState.state:
 	site.hopProbUpdate(LineState.hopProb)
 
-for site in LineState.state:
-	print site.isStation, site.segmentationNumber, site.hopProb
-
+# for i,site in enumerate(LineState.state):
+# 	print i,site.isStation, site.segmentationNumber, site.hopProb
 
 #Time Control
 current = datetime.datetime(100,1,1,6,55,00)
@@ -50,11 +49,11 @@ for i in range(0,len(TrainList)):
 	if (TrainList[i].TimeTable[0] - datetime.timedelta(seconds=30)).time() < current.time():
 		firstTrainNum += 1
 
-trouble = True
+trouble = False
 troubleStart = datetime.datetime(100,1,1,7,30,00)
-troubleEnd = datetime.datetime(100,1,1,7,35,00)
+troubleEnd = datetime.datetime(100,1,1,7,32,00)
 
-probControl = True
+# probControl = False
 
 #MAIN BODY
 while current <= end:
@@ -114,12 +113,12 @@ while current <= end:
 		#print LineState.state[TrainList[i].CurrentSite].segmentationNumber, LineState.hopProb[LineState.state[TrainList[i].CurrentStop].segmentationNumber]
 		if TrainList[i].InOperation and TrainList[i].isForward and TrainList[i].CurrentSite != 999:
 			if LineState.state[TrainList[i].CurrentSite+1].existTrain == False: #Collision prevention
-				if random.random() <= LineState.hopProb[LineState.state[TrainList[i].CurrentSite].segmentationNumber]: #Probably control
+				if random.random() <= LineState.state[TrainList[i].CurrentSite].hopProb: #Probably control
 					LineState.state[TrainList[i].CurrentSite].existTrain = False
 					TrainList[i].CurrentSiteUpdate()
 					LineState.state[TrainList[i].CurrentSite].existTrain = True
 
-	# print current.time(),TrainList[24].TrainNum,TrainList[24].CurrentStop,TrainList[24].CurrentSite,TrainList[24].arrive.time(),TrainList[24].isForward,TrainList[24].InOperation
+	# print current.time(),TrainList[26].TrainNum,TrainList[26].CurrentStop,TrainList[26].CurrentSite,TrainList[26].arrive.time(),TrainList[26].isForward,TrainList[26].InOperation
 	LineState.OutputState(current)
 	current += timePerStep
 #MAIN BODY
