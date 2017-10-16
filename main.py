@@ -31,7 +31,7 @@ for i in range(1,StationNum):
 		LineState.append(SiteCell(False,i,None,False)) #represents interstation
 	LineState.append(SiteCell(True,i,i,False)) #represents stations
 
-LineState.hopProb[3] = 0.75
+LineState.hopProb[3] = 0.5
 # print LineState.hopProb
 for site in LineState.state:
 	site.hopProbUpdate(LineState.hopProb)

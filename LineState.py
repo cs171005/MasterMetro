@@ -30,7 +30,7 @@ class LineState:
 
 	def OutputState(self,currentTime):
 		#self.outputFile = 'output'+'.txt'
-		self.outputFile = 'output'+datetime.datetime.now().strftime('%s')+'.txt'
+		self.outputFile = 'result-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.txt'
 
 		if os.path.exists(self.outputFile):
 			f = open(self.outputFile,'a')
