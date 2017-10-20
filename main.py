@@ -31,7 +31,7 @@ for i in range(1,StationNum):
 		LineState.append(SiteCell(False,i,None,False)) #represents interstation
 	LineState.append(SiteCell(True,i,i,False)) #represents stations
 
-LineState.hopProb[3] = 0.75
+LineState.hopProb[3] = 0.5
 # print LineState.hopProb
 for site in LineState.state:
 	site.hopProbUpdate(LineState.hopProb)
@@ -42,14 +42,14 @@ for site in LineState.state:
 #Time Control
 current = datetime.datetime(100,1,1,6,55,00)
 timePerStep = datetime.timedelta(seconds=60/CellNumPerMinute)
-end = datetime.datetime(100,1,1,8,30,00)
+end = datetime.datetime(100,1,1,12,30,00)
 
 firstTrainNum = 0 #this number represents the first train number whose behavior is simulated in this simulation.
 for i in range(0,len(TrainList)):
 	if (TrainList[i].TimeTable[0] - datetime.timedelta(seconds=30)).time() < current.time():
 		firstTrainNum += 1
 
-trouble = False
+trouble = True
 troubleStart = datetime.datetime(100,1,1,7,30,00)
 troubleEnd = datetime.datetime(100,1,1,7,32,00)
 
