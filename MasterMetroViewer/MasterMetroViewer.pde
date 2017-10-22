@@ -6,7 +6,7 @@ void setup() {
   File dir = new File(sketchPath());
   
   // Open the file from the createWriter() example
-  reader = createReader("result-171020-194114.txt");   
+  reader = createReader("result-171022-182707.txt");   
   size(displayWidth,200);
   background(255);
   fill(0);

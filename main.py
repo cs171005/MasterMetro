@@ -22,6 +22,16 @@ for i,row in enumerate(reader):
 	#print TrainList[i].TimeTable
 f.close()
 
+######
+
+dict = {
+datetime.datetime(100,1,1,8,30,00):[1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+datetime.datetime(100,1,1,9,30,00):[1, 1, 1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+datetime.datetime(100,1,1,10,30,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1]
+}
+# print dict
+######
+
 # random.seed(1)
 #Line up SiteCell
 LineState = LineState()
@@ -57,6 +67,12 @@ troubleEnd = datetime.datetime(100,1,1,7,32,00)
 
 #MAIN BODY
 while current <= end:
+	if current >= datetime.datetime(100,1,1,8,30,00):
+		LineState.hopProb = dict[datetime.datetime(100,1,1,8,30,00)]
+		for site in LineState.state:
+			site.hopProbUpdate(LineState.hopProb)
+		# print LineState.hopProb
+
 	for i in range(firstTrainNum,len(TrainList)):
 		#Incident
 		if trouble:
@@ -123,4 +139,4 @@ while current <= end:
 	current += timePerStep
 #MAIN BODY
 
-os.system('open ' + LineState.outputFile)
+os.system('open -a /Applications/TextEdit.app ' + LineState.outputFile)
