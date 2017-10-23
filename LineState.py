@@ -26,12 +26,7 @@ class LineState:
 				for site in self.state:
 					site.siteHopProbUpdate(self.hopProb)
 				break
-		# if current >= datetime.datetime(100,1,1,8,30,00):
-		# 	self.hopProb = self.hopProbDic[datetime.datetime(100,1,1,8,30,00)]
-		# 	for site in self.state:
-		# 		site.siteHopProbUpdate(self.hopProbDic[datetime.datetime(100,1,1,8,30,00)])
-		# 	# print self.hopProb
-
+		
 	def setHopProbInOneSegment(self,segment,prob):
 		newHopProb = self.hopProb
 		newHopProb[segment] = prob
