@@ -31,10 +31,10 @@ for i in range(1,StationNum):
 		LineState.append(SiteCell(False,i,None,False)) #represents interstation
 	LineState.append(SiteCell(True,i,i,False)) #represents stations
 
-LineState.hopProb[3] = 0.5
+LineState.setHopProbInOneSegment(3,0.5)
 # print LineState.hopProb
 for site in LineState.state:
-	site.hopProbUpdate(LineState.hopProb)
+	site.siteHopProbUpdate(LineState.hopProb)
 
 # for i,site in enumerate(LineState.state):
 # 	print i,site.isStation, site.segmentationNumber, site.hopProb
@@ -49,22 +49,10 @@ for i in range(0,len(TrainList)):
 	if (TrainList[i].TimeTable[0] - datetime.timedelta(seconds=30)).time() < current.time():
 		firstTrainNum += 1
 
-trouble = True
-troubleStart = datetime.datetime(100,1,1,7,30,00)
-troubleEnd = datetime.datetime(100,1,1,7,32,00)
-
-# probControl = False
-
 #MAIN BODY
 while current <= end:
+	LineState.setHopProb(current)
 	for i in range(firstTrainNum,len(TrainList)):
-		#Incident
-		if trouble:
-			if troubleStart <= current <= troubleEnd:
-				break
-				#This break means skipping the current timestep in incident.
-				#If this if statement is evaluated to true, the following statements in while-loop will be ignored.
-
 		if TrainList[i].CurrentStop < StationNum-1: #ARRIVE and DEPERTURE at Starting and Halfway statitons
 			# ARRIVE
 			if TrainList[i].CurrentStop != -1 and LineState.state[TrainList[i].CurrentSite].isStation == True:
@@ -123,4 +111,4 @@ while current <= end:
 	current += timePerStep
 #MAIN BODY
 
-os.system('open ' + LineState.outputFile)
+os.system('open -a /Applications/TextEdit.app ' + LineState.outputFile)

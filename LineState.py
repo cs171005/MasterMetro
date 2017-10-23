@@ -8,12 +8,34 @@ class LineState:
 		self.state = []
 		self.outputFile = ''
 		self.hopProb = [1]*19 #StationNum #default:trains always progress.
+		self.hopProbDic = {
+		datetime.datetime(100,1,1,8,30,00):[1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,9,00,00):[1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], #Incident
+		datetime.datetime(100,1,1,9,15,00):[1, 1, 1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,10,30,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1]
+		}
 
 	def append(self,newSite):
 		self.state.append(newSite)
 
-	def setHopProb(self,segmentation,prob):
-		self.hopProb[segmentation] = prob
+	def setHopProb(self,current):
+		nextApply = datetime.datetime(100,1,1,0,00,00)
+		for key in self.hopProbDic.keys():
+	 		if key == current:
+				self.hopProb = self.hopProbDic[key]
+				for site in self.state:
+					site.siteHopProbUpdate(self.hopProb)
+				break
+		
+	def setHopProbInOneSegment(self,segment,prob):
+		newHopProb = self.hopProb
+		newHopProb[segment] = prob
+		for site in self.state:
+			site.siteHopProbUpdate(newHopProb)
+		# print self.hopProb
+
+	def setHopProbDic(self,startTime,probArray):
+		self.hopProbDic[startTime] = probArray
 
 	def printState(self,currentTime):
 		output = ''
@@ -60,6 +82,6 @@ class SiteCell:
 		self.stationNumber = stationNumber
 		self.hopProb = 1 #default:1
 
-	def hopProbUpdate(self,HPArray):
+	def siteHopProbUpdate(self,HPArray):
 		if not self.isStation:
 			self.hopProb = HPArray[self.segmentationNumber]
