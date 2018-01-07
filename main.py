@@ -31,7 +31,6 @@ for i in range(1,StationNum):
 		LineState.append(SiteCell(False,i,None,False)) #represents interstation
 	LineState.append(SiteCell(True,i,i,False)) #represents stations
 
-LineState.setHopProbInOneSegment(3,0.5)
 # print LineState.hopProb
 for site in LineState.state:
 	site.siteHopProbUpdate(LineState.hopProb)
@@ -40,9 +39,9 @@ for site in LineState.state:
 # 	print i,site.isStation, site.segmentationNumber, site.hopProb
 
 #Time Control
-current = datetime.datetime(100,1,1,6,55,00)
+current = datetime.datetime(100,1,1,4,55,00)
 timePerStep = datetime.timedelta(seconds=60/CellNumPerMinute)
-end = datetime.datetime(100,1,1,12,30,00)
+end = datetime.datetime(100,1,1,13,10,00)
 
 firstTrainNum = 0 #this number represents the first train number whose behavior is simulated in this simulation.
 for i in range(0,len(TrainList)):
@@ -59,6 +58,7 @@ while current <= end:
 			#arrive at halfway stations
 				if TrainList[i].isForward:
 					TrainList[i].arriveUpdate(current)
+					TrainList[i].MeasureDelay(current)
 
 				TrainList[i].isForward = False
 			elif TrainList[i].CurrentStop == -1 and current.time() >= (TrainList[i].TimeTable[0] - datetime.timedelta(seconds=30)).time():
@@ -88,6 +88,8 @@ while current <= end:
 		# ARRIVE
 			if TrainList[i].CurrentStop != -1 and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2-1].time():
 				TrainList[i].isForward = False
+				TrainList[i].MeasureDelay(current)
+
 		# DEPERTURE
 		#terminal station to end-side depot
 			if current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
@@ -109,6 +111,20 @@ while current <= end:
 	# print current.time(),TrainList[26].TrainNum,TrainList[26].CurrentStop,TrainList[26].CurrentSite,TrainList[26].arrive.time(),TrainList[26].isForward,TrainList[26].InOperation
 	LineState.OutputState(current)
 	current += timePerStep
-#MAIN BODY
+#MAIN BODY↑↑
+os.chdir("/Users/ev30112/Dropbox/programming/MasterMetro/MasterMetroViewer/data")
+outputFile = 'delaylog-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.txt'
+
+if os.path.exists(outputFile):
+	f = open(outputFile,'a')
+else:
+	f = open(outputFile,'w')
+
+for t in TrainList:
+	f.write(str(t.delaySecList) + '\n')
+#sys.stdout.flush()
+f.flush()
+f.close()
 
 os.system('open -a /Applications/TextEdit.app ' + LineState.outputFile)
+os.system('open -a /Applications/mi.app ' + outputFile)
