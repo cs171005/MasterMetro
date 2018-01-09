@@ -9,6 +9,7 @@ class Train:
 		self.isForward = False
 		self.CurrentStop = -1
 		self.CurrentSite = -1
+		self.arrivedFinalStop = False
 		self.arrive = datetime.datetime(100,1,1,4,55,00)
 		self.delaySecList = []
 
@@ -32,4 +33,4 @@ class Train:
 
 	def MeasureDelay(self,currentTime):
 		delay = currentTime - self.TimeTable[self.CurrentStop*2-1]
-		self.delaySecList.append(delay.seconds - datetime.timedelta(seconds = 15).seconds)
+		self.delaySecList.append((delay - datetime.timedelta(seconds = 15)).seconds)

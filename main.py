@@ -2,6 +2,9 @@
 import csv
 import datetime
 import random
+import numpy as np
+import matplotlib.pyplot as plt
+
 from Train import *
 from LineState import *
 
@@ -88,7 +91,9 @@ while current <= end:
 		# ARRIVE
 			if TrainList[i].CurrentStop != -1 and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2-1].time():
 				TrainList[i].isForward = False
-				TrainList[i].MeasureDelay(current)
+				if not TrainList[i].arrivedFinalStop:
+					TrainList[i].MeasureDelay(current)
+					TrainList[i].arrivedFinalStop = True
 
 		# DEPERTURE
 		#terminal station to end-side depot
@@ -125,6 +130,16 @@ for t in TrainList:
 #sys.stdout.flush()
 f.flush()
 f.close()
+
+delayall = []
+for t in TrainList:
+	delayall.extend(t.delaySecList)
+delayall.remove(0)
+delayall = [item for item in delayall if item is not 0]
+print delayall
+
+plt.hist(delayall,bins=20)
+plt.show()
 
 os.system('open -a /Applications/TextEdit.app ' + LineState.outputFile)
 os.system('open -a /Applications/mi.app ' + outputFile)
