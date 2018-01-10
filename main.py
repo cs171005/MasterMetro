@@ -127,19 +127,35 @@ else:
 
 for t in TrainList:
 	f.write(str(t.delaySecList) + '\n')
-#sys.stdout.flush()
+
 f.flush()
 f.close()
 
 delayall = []
+delaymean = []
 for t in TrainList:
 	delayall.extend(t.delaySecList)
+	delaymean.append(np.mean(t.delaySecList))
+
 delayall.remove(0)
-delayall = [item for item in delayall if item is not 0]
-print delayall
+delayall = [item for item in delayall if item is not 0] #remove 0
+#print delaymean
+
+os.system('open -a /Applications/TextEdit.app ' + LineState.outputFile)
+os.system('open -a /Applications/mi.app ' + outputFile)
 
 plt.hist(delayall,bins=20)
 plt.show()
 
-os.system('open -a /Applications/TextEdit.app ' + LineState.outputFile)
-os.system('open -a /Applications/mi.app ' + outputFile)
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+# 箱ひげ図をつくる
+bp = ax.boxplot(delaymean)
+
+plt.title('Box plot')
+plt.grid()
+plt.xlabel('point')
+plt.ylabel('value')
+plt.title('Box plot')
+plt.show()
