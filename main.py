@@ -147,14 +147,20 @@ os.system('open -a /Applications/mi.app ' + outputFile)
 plt.hist(delayall,bins=20)
 plt.show()
 
+# 箱ひげ図をつくる
+'''
 fig = plt.figure()
 ax = fig.add_subplot(111)
+'''
+from numpy.random import *
 
-# 箱ひげ図をつくる
+delaymean.remove(0)
+delaymean = [item for item in delayall if item is not 0] #remove 0
+fig, ax = plt.subplots()
 bp = ax.boxplot(delaymean)
-
 plt.title('Box plot')
 plt.grid()
+
 plt.xlabel('point')
 plt.ylabel('value')
 plt.title('Box plot')
