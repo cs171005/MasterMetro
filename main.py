@@ -4,6 +4,7 @@ import datetime
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+#from numpy.random import *
 
 from Train import *
 from LineState import *
@@ -33,6 +34,7 @@ for i in range(1,StationNum):
 	for j in range(0,interStationMinutes*CellNumPerMinute-1):
 		LineState.append(SiteCell(False,i,None,False)) #represents interstation
 	LineState.append(SiteCell(True,i,i,False)) #represents stations
+#LineState.append(SiteCell(False,i,None,False)) #represents interstation
 
 # print LineState.hopProb
 for site in LineState.state:
@@ -54,7 +56,7 @@ for i in range(0,len(TrainList)):
 #MAIN BODY
 while current <= end:
 	LineState.setHopProb(current)
-	for i in range(firstTrainNum,len(TrainList)):
+	for i in range(firstTrainNum,len(TrainList)): #
 		if TrainList[i].CurrentStop < StationNum-1: #ARRIVE and DEPERTURE at Starting and Halfway statitons
 			# ARRIVE
 			if TrainList[i].CurrentStop != -1 and LineState.state[TrainList[i].CurrentSite].isStation == True:
@@ -107,12 +109,12 @@ while current <= end:
 		#move to the next site cell (represents an inter-section)
 		#print LineState.state[TrainList[i].CurrentSite].segmentationNumber, LineState.hopProb[LineState.state[TrainList[i].CurrentStop].segmentationNumber]
 		if TrainList[i].InOperation and TrainList[i].isForward and TrainList[i].CurrentSite != 999:
-			if LineState.state[TrainList[i].CurrentSite+1].existTrain == False: #Collision prevention
+			if LineState.state[TrainList[i].CurrentSite+1].existTrain == False : #Collision prevention
 				if random.random() <= LineState.state[TrainList[i].CurrentSite].hopProb: #Probably control
 					LineState.state[TrainList[i].CurrentSite].existTrain = False
 					TrainList[i].CurrentSiteUpdate()
 					LineState.state[TrainList[i].CurrentSite].existTrain = True
-
+#and LineState.state[TrainList[i].CurrentSite+2].existTrain == False
 	# print current.time(),TrainList[26].TrainNum,TrainList[26].CurrentStop,TrainList[26].CurrentSite,TrainList[26].arrive.time(),TrainList[26].isForward,TrainList[26].InOperation
 	LineState.OutputState(current)
 	current += timePerStep
@@ -136,32 +138,22 @@ delaymean = []
 for t in TrainList:
 	delayall.extend(t.delaySecList)
 	delaymean.append(np.mean(t.delaySecList))
-
+print len(delayall), len(delaymean)
 delayall.remove(0)
 delayall = [item for item in delayall if item is not 0] #remove 0
 #print delaymean
 
 os.system('open -a /Applications/TextEdit.app ' + LineState.outputFile)
 os.system('open -a /Applications/mi.app ' + outputFile)
+fig, (plt_h, plt_b) = plt.subplots(ncols=2, figsize=(20,8))
 
-plt.hist(delayall,bins=20)
-plt.show()
+plt_h.hist(delayall,bins=20)
 
 # 箱ひげ図をつくる
-'''
-fig = plt.figure()
-ax = fig.add_subplot(111)
-'''
-from numpy.random import *
+
 
 delaymean.remove(0)
 delaymean = [item for item in delayall if item is not 0] #remove 0
-fig, ax = plt.subplots()
-bp = ax.boxplot(delaymean)
-plt.title('Box plot')
-plt.grid()
-
-plt.xlabel('point')
-plt.ylabel('value')
-plt.title('Box plot')
+plt_b.boxplot(delaymean)
+plt_b.grid()
 plt.show()
