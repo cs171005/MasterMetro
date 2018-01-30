@@ -2,17 +2,31 @@
 import os.path
 import os
 import datetime
+import sys
+
 # from main import StationNum
 class LineState:
 	def __init__(self):
 		self.state = []
 		self.outputFile = ''
 		self.hopProb = [1]*19 #StationNum #default:trains always progress.
+		self.outputFile = 'result-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.txt'
 		self.hopProbDic = {
-		datetime.datetime(100,1,1,8,30,00):[1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,8,30,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 		datetime.datetime(100,1,1,9,00,00):[1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], #Incident
-		datetime.datetime(100,1,1,9,15,00):[1, 1, 1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		datetime.datetime(100,1,1,10,30,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 1]
+		datetime.datetime(100,1,1,9,05,00):[1, 1, 1, 1, 1, 1, 0.1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], #Incident
+		datetime.datetime(100,1,1,9,10,00):[1, 1, 1, 1, 1, 1, 0.1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], #Incident
+		datetime.datetime(100,1,1,9,15,00):[1, 1, 1, 1, 1, 1, 0.1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,9,30,00):[1, 1, 1, 1, 1, 1, 0.1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,9,45,00):[1, 1, 1, 1, 1, 1, 0.1, 0.3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,10,00,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,10,15,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,10,30,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,10,45,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,11,00,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,11,15,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,11,30,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		datetime.datetime(100,1,1,11,45,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 		}
 
 	def append(self,newSite):
@@ -26,7 +40,7 @@ class LineState:
 				for site in self.state:
 					site.siteHopProbUpdate(self.hopProb)
 				break
-		
+
 	def setHopProbInOneSegment(self,segment,prob):
 		newHopProb = self.hopProb
 		newHopProb[segment] = prob
@@ -53,12 +67,7 @@ class LineState:
 	def OutputState(self,currentTime):
 		#self.outputFile = 'output'+'.txt'
 		os.chdir("/Users/ev30112/Dropbox/programming/MasterMetro/MasterMetroViewer/data")
-		self.outputFile = 'result-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.txt'
-
-		if os.path.exists(self.outputFile):
-			f = open(self.outputFile,'a')
-		else:
-			f = open(self.outputFile,'w')
+		f = open(self.outputFile,'a')
 
 		output = ''
 		for Site in self.state:
@@ -71,6 +80,7 @@ class LineState:
 			if Site.isStation:
 				output += ']'
 		f.write(str(currentTime.time())+' '+output+'\n')
+		#sys.stdout.flush()
 		f.flush()
 		f.close()
 
