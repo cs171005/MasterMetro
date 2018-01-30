@@ -10,6 +10,7 @@ class LineState:
 		self.state = []
 		self.outputFile = ''
 		self.hopProb = [1]*19 #StationNum #default:trains always progress.
+		self.outputFile = 'result-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.txt'
 		self.hopProbDic = {
 		datetime.datetime(100,1,1,8,30,00):[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 		datetime.datetime(100,1,1,9,00,00):[1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], #Incident
@@ -66,12 +67,7 @@ class LineState:
 	def OutputState(self,currentTime):
 		#self.outputFile = 'output'+'.txt'
 		os.chdir("/Users/ev30112/Dropbox/programming/MasterMetro/MasterMetroViewer/data")
-		self.outputFile = 'result-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.txt'
-
-		if os.path.exists(self.outputFile):
-			f = open(self.outputFile,'a')
-		else:
-			f = open(self.outputFile,'w')
+		f = open(self.outputFile,'a')
 
 		output = ''
 		for Site in self.state:
