@@ -40,6 +40,9 @@ for i in range(1,StationNum):
 for site in LineState.state:
 	site.siteHopProbUpdate(LineState.hopProb)
 
+RecordedTimeTable = [[] for i in range(len(TrainList))]
+# print "len:" + str(len(RecordedTimeTable))
+
 # for i,site in enumerate(LineState.state):
 # 	print i,site.isStation, site.segmentationNumber, site.hopProb
 
@@ -64,6 +67,7 @@ while current <= end:
 				if TrainList[i].isForward:
 					TrainList[i].arriveUpdate(current)
 					TrainList[i].MeasureDelay(current)
+					RecordedTimeTable[i].append("ARRh:"+str(current - timePerStep))
 
 				TrainList[i].isForward = False
 			elif TrainList[i].CurrentStop == -1 and current.time() >= (TrainList[i].TimeTable[0] - datetime.timedelta(seconds=30)).time():
@@ -74,6 +78,8 @@ while current <= end:
 					TrainList[i].isForward = False
 					LineState.state[TrainList[i].CurrentSite].existTrain = True
 					TrainList[i].arriveUpdate(current)
+
+					# RecordedTimeTable[i].append(""+str(current - timePerStep))
 			# DEPERTURE (updating destination station)
 			if TrainList[i].CurrentStop == -1 and current.time() >= TrainList[i].TimeTable[0].time():
 			#starting depot to starting station
@@ -82,12 +88,14 @@ while current <= end:
 					TrainList[i].ConvertOperationMode()	#F->T
 					TrainList[i].isForward = True
 
+					RecordedTimeTable[i].append("DEPs:"+str(current - timePerStep))
 					LineState.state[0].existTrain = True
 			elif LineState.state[TrainList[i].CurrentSite].isStation and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time() and current.time() >= (TrainList[i].arrive + datetime.timedelta(seconds=30)).time():
 			#deperture from stations in halfway.
 				if LineState.state[TrainList[i].CurrentSite+1].existTrain == False: #Collision prevention
 					TrainList[i].CurrentStopUpdate()
 					TrainList[i].isForward = True
+					RecordedTimeTable[i].append("DEPh:"+str(current - timePerStep))
 
 		elif TrainList[i].CurrentStop == StationNum-1: #ARRIVE and DEPERTURE at terminal station
 		# ARRIVE
@@ -96,7 +104,7 @@ while current <= end:
 				if not TrainList[i].arrivedFinalStop:
 					TrainList[i].MeasureDelay(current)
 					TrainList[i].arrivedFinalStop = True
-
+					RecordedTimeTable[i].append("ARRt"+str(current - timePerStep))
 		# DEPERTURE
 		#terminal station to end-side depot
 			if current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time():
@@ -139,6 +147,9 @@ for t in TrainList:
 	delayall.extend(t.delaySecList)
 	delaymean.append(np.mean(t.delaySecList))
 print len(delayall), len(delaymean)
+
+for r in RecordedTimeTable:
+	print r
 delayall.remove(0)
 delayall = [item for item in delayall if item is not 0] #remove 0
 #print delaymean
