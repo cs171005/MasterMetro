@@ -127,6 +127,8 @@ while current <= end:
 	LineState.OutputState(current)
 	current += timePerStep
 #MAIN BODY↑↑
+
+#
 os.chdir("/Users/ev30112/Dropbox/programming/MasterMetro/MasterMetroViewer/data")
 outputFile = 'delaylog-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.txt'
 
@@ -140,6 +142,26 @@ for t in TrainList:
 
 f.flush()
 f.close()
+
+
+os.chdir("/Users/ev30112/Dropbox/programming/MasterMetro/MasterMetroViewer/data")
+outputFile = 'RecordedTimeTable-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.csv'
+
+if os.path.exists(outputFile):
+	f = open(outputFile,'a')
+else:
+	f = open(outputFile,'w')
+
+for r in RecordedTimeTable:
+	recorded_row = ""
+	for rw_stmp in r:
+		stmp = rw_stmp.split(" ")[1]
+		recorded_row += str(stmp) + ','
+	f.write(recorded_row[:-1] +'\n')
+
+f.flush()
+f.close()
+
 
 delayall = []
 delaymean = []
