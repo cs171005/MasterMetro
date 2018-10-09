@@ -125,7 +125,7 @@ while current <= end:
 					LineState.state[TrainList[i].CurrentSite].existTrain = False
 					TrainList[i].CurrentSiteUpdate()
 					LineState.state[TrainList[i].CurrentSite].existTrain = True
-#and LineState.state[TrainList[i].CurrentSite+2].existTrain == False
+	#and LineState.state[TrainList[i].CurrentSite+2].existTrain == False
 	# print current.time(),TrainList[26].TrainNum,TrainList[26].CurrentStop,TrainList[26].CurrentSite,TrainList[26].arrive.time(),TrainList[26].isForward,TrainList[26].InOperation
 	LineState.OutputState(current)
 	current += timePerStep
