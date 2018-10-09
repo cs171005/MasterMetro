@@ -11,7 +11,7 @@ class Train:
 		self.CurrentSite = -1
 		self.arrivedFinalStop = False
 		self.arrive = datetime.datetime(100,1,1,4,55,00)
-		self.delaySecList = []
+		self.RecordedTime = []
 
 	def arriveUpdate(self,current):
 		self.arrive = current
@@ -32,5 +32,4 @@ class Train:
 		self.InOperation = not self.InOperation
 
 	def MeasureDelay(self,currentTime):
-		delay = currentTime - self.TimeTable[self.CurrentStop*2-1]
-		self.delaySecList.append((delay - datetime.timedelta(seconds = 15)).seconds)
+		self.RecordedTime.append(currentTime - datetime.timedelta(seconds = 15))

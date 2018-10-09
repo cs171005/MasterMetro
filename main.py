@@ -3,6 +3,8 @@ import csv
 import datetime
 import random
 import numpy as np
+import pyper
+
 import matplotlib.pyplot as plt
 #from numpy.random import *
 
@@ -87,7 +89,7 @@ while current <= end:
 					TrainList[i].CurrentSiteUpdate()
 					TrainList[i].ConvertOperationMode()	#F->T
 					TrainList[i].isForward = True
-
+					TrainList[i].MeasureDelay(current)
 					RecordedTimeTable[i].append("DEPs:"+str(current - timePerStep))
 					LineState.state[0].existTrain = True
 			elif LineState.state[TrainList[i].CurrentSite].isStation and current.time() > TrainList[i].TimeTable[TrainList[i].CurrentStop*2].time() and current.time() >= (TrainList[i].arrive + datetime.timedelta(seconds=30)).time():
@@ -95,6 +97,7 @@ while current <= end:
 				if LineState.state[TrainList[i].CurrentSite+1].existTrain == False: #Collision prevention
 					TrainList[i].CurrentStopUpdate()
 					TrainList[i].isForward = True
+					TrainList[i].MeasureDelay(current)
 					RecordedTimeTable[i].append("DEPh:"+str(current - timePerStep))
 
 		elif TrainList[i].CurrentStop == StationNum-1: #ARRIVE and DEPERTURE at terminal station
@@ -138,7 +141,7 @@ else:
 	f = open(outputFile,'w')
 
 for t in TrainList:
-	f.write(str(t.delaySecList) + '\n')
+	f.write(str(t.RecordedTime) + '\n')
 
 f.flush()
 f.close()
@@ -162,18 +165,30 @@ for r in RecordedTimeTable:
 f.flush()
 f.close()
 
-
-delayall = []
-delaymean = []
-for t in TrainList:
-	delayall.extend(t.delaySecList)
-	delaymean.append(np.mean(t.delaySecList))
-print len(delayall), len(delaymean)
-
 for r in RecordedTimeTable:
 	print r
-delayall.remove(0)
+
+print('-----')
+delayall = []
+delaymean = []
+d_table = []
+for t in TrainList:
+	d_row = []
+	print(str(t.RecordedTime) + '\n')
+	print len(t.TimeTable[:-1]) == len(t.RecordedTime)
+	for i in range(len(t.RecordedTime)):
+		d = (t.RecordedTime[i] - t.TimeTable[:-1][i]).seconds
+		d_row.append(d)
+		delayall.append(d)
+	d_table.append(d_row)
+
+for i in range(len(d_table)):
+	print d_table[i]
+
+
 delayall = [item for item in delayall if item is not 0] #remove 0
+print "---------"
+print delayall
 #print delaymean
 
 os.system('open -a /Applications/TextEdit.app ' + LineState.outputFile)
@@ -181,12 +196,4 @@ os.system('open -a /Applications/mi.app ' + outputFile)
 fig, (plt_h, plt_b) = plt.subplots(ncols=2, figsize=(20,8))
 
 plt_h.hist(delayall,bins=20)
-
-# 箱ひげ図をつくる
-
-
-delaymean.remove(0)
-delaymean = [item for item in delayall if item is not 0] #remove 0
-plt_b.boxplot(delaymean)
-plt_b.grid()
 plt.show()
