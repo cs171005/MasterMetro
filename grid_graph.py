@@ -3,6 +3,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+from TrafficFlowSimulator import *
 
 
 def add_cross_edge(gp, shape):
@@ -42,7 +43,7 @@ ngrid = 5
 # num_of_train = 40
 
 num_of_station = 19
-num_of_train = 10
+num_of_train = 85
 
 
 g_dim = [1+2*(num_of_station-1), num_of_train]
@@ -107,7 +108,7 @@ idcs = np.random.choice(len(gp.nodes()), int(ngrid * ngrid * 0.2), replace=False
 print idcs
 
 # スタート・ゴール・障害物を設定する
-st, gl, obs = (0,0), (9,9), [list(gp.nodes())[i] for i in idcs[2:]]
+st, gl, obs = (0,0), (7,9), [list(gp.nodes())[i] for i in idcs[2:]]
 # st, gl, obs = (0,0), (np.random.randint(g_dim[0]),np.random.randint(g_dim[1])), [list(gp.nodes())[i] for i in idcs[2:]]
 obs = [list(gp.nodes())[i] for i in idcs[2:]]
 
@@ -182,6 +183,31 @@ gp.node[st]['color'] = 'green'
 gp.node[gl]['color'] = 'red'
 for o in obs:
     gp.node[o]['color'] = 'black'
+
+TFS = TrafficFlowSimulator()
+ttt = TFS.runWithDelayMatrix()
+
+criterior = 180
+
+bolttt = []
+for row in range(0,len(ttt)):
+    blt = []
+    for col in range(0,len(ttt[row])):
+        if ttt[row][col] >= criterior:
+            blt.append(True)
+        else:
+            blt.append(False)
+    bolttt.append(blt)
+
+for row in range(0,len(bolttt)):
+    print bolttt[row]
+
+
+for n in gp.nodes():
+    if n[0] < 36 and bolttt[n[1]][n[0]]:
+        print n, bolttt[n[1]][n[0]]
+        gp.node[n]['color'] = 'pink'
+
 
 #show the graph
 pos = dict((n, n) for n in gp.nodes())
