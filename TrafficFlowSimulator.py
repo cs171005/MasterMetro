@@ -44,6 +44,25 @@ class TrafficFlowSimulator:
         for site in self.LineState.state:
         	site.siteHopProbUpdate(self.LineState.hopProb)
 
+    def runWithDelayDissatisfactionBool(self,criterior):
+        ttt = self.runWithDelayMatrix()
+
+        criterior = 180
+
+        bolttt = []
+        for row in range(0,len(ttt)):
+            blt = []
+            for col in range(0,len(ttt[row])):
+                if ttt[row][col] >= criterior:
+                    blt.append(True)
+                else:
+                    blt.append(False)
+            bolttt.append(blt)
+
+        for row in range(0,len(bolttt)):
+            print bolttt[row]
+        return bolttt
+
     def runWithDelayMatrix(self):
         delayall = []
         delaymean = []
