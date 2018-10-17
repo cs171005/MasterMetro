@@ -47,8 +47,6 @@ class TrafficFlowSimulator:
     def runWithDelayDissatisfactionBool(self,criterior):
         ttt = self.runWithDelayMatrix()
 
-        criterior = 180
-
         bolttt = []
         for row in range(0,len(ttt)):
             blt = []
