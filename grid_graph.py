@@ -57,7 +57,7 @@ def dist(a, b):
     x2 = np.array(b, dtype=np.float32)
     return np.linalg.norm(x1 - x2)
 
-def dissatisfaction(origin, destination, bolttt, claim_file):
+def dissatisfaction(origin, destination, bolttt, ttt, claim_file):
     dissatisfaction_weight = 0
 
     origin_station_number = 0
@@ -72,18 +72,45 @@ def dissatisfaction(origin, destination, bolttt, claim_file):
         destination_station_number = destination[0]/2
     else:
         destination_station_number = (destination[0]+1)/2
+
     if origin[1] == destination[1]:
+        #same train number.
         if bolttt[origin[1]][origin[0]]:
             if origin[0]%2 == 0:
+                #when origin node is the deperture node.
                 dissatisfaction_weight += claim_file[origin_station_number]["deperture_delay"]
             else:
                 dissatisfaction_weight += claim_file[origin_station_number]["arrival_delay"]
 
+            if ttt[destination[1]][destination[0]] - ttt[origin[1]][origin[0]] > 0:
+                # corresponding to increase in stop time at the previous edge.
+                dissatisfaction_weight += claim_file[origin_station_number]["hold_time_increasement"]
+
         if bolttt[destination[1]][destination[0]]:
             if destination[0]%2 == 0:
+                #when origin node is the arrive node.
                 dissatisfaction_weight += claim_file[destination_station_number]["deperture_delay"]
             else:
                 dissatisfaction_weight += claim_file[destination_station_number]["arrival_delay"]
+
+            if ttt[destination[1]][destination[0]] - ttt[origin[1]][origin[0]] > 0:
+                # corresponding to increase in running time at the previous edge.
+                dissatisfaction_weight += claim_file[origin_station_number]["running_time_increasement"]
+    else:
+        # diffrence train number.
+        if origin[0] == destination[0] and origin[0]%2 != 0:
+            # vertical connection between arrival nodes.
+            if bolttt[origin[1]][origin[0]] and bolttt[destination[1]][destination[0]]:
+                # * ← delayed
+                # |
+                # * ← delayed
+                if abs(ttt[origin[1]][origin[0]] - ttt[destination[1]][destination[0]]) != 0:
+                    dissatisfaction_weight += claim_file[destination_station_number]["frequency"]
+            elif bolttt[destination[1]][destination[0]]:
+                # @ ← not delayed
+                # |
+                # * ← delayed
+                dissatisfaction_weight += claim_file[destination_station_number]["frequency"]
 
     return dissatisfaction_weight
 
@@ -133,7 +160,7 @@ if __name__ == '__main__':
 
     claim_file = {}
     for st in range(num_of_station):
-        c_components = {"deperture_delay":3000,"arrival_delay":3000,"hold_time_increasement":44,"running_time_incresement":45,"frequency":46,"transit_connection":47}
+        c_components = {"deperture_delay":42,"arrival_delay":42,"hold_time_increasement":44,"running_time_increasement":45,"frequency":46,"transit_connection":47}
         claim_file[st] = c_components
 
     ddd = 1.0
@@ -141,7 +168,7 @@ if __name__ == '__main__':
     nx.set_edge_attributes(gp, -1*ddd, 'negative_weight')
 
     criterior = 180
-    bolttt = TFS.runWithDelayDissatisfactionBool(criterior)
+    bolttt,rawttt = TFS.runWithDelayDissatisfactionBool(criterior)
     # print len(bolttt[0]),len(bolttt)
 
     print len(bolttt), len(bolttt[0])
@@ -153,42 +180,21 @@ if __name__ == '__main__':
 
         # print eg
         print eg[0], eg[1], eg[2]['weight']
-        print dissatisfaction(eg[0], eg[1], bolttt, claim_file)
-        eg[2]['weight'] += dissatisfaction(eg[0], eg[1], bolttt, claim_file)
+        print dissatisfaction(eg[0], eg[1], bolttt, rawttt, claim_file)
+        eg[2]['weight'] += dissatisfaction(eg[0], eg[1], bolttt, rawttt, claim_file)
         penalty = 0.0
         modified_p = 0.0
         if bolttt[eg[0][1]][eg[0][0]]:
             if bolttt[eg[1][1]][eg[1][0]]:
                 # eg[0]:true, eg[1]:true
-
                 gp.node[eg[0]]['color'] = 'green'
                 gp.node[eg[1]]['color'] = 'green'
-
-                # if eg[0][0]%2 == 0:
-                #     modified_p += claim_file[eg[0][0]]["deperture_delay"]
-                #     modified_p += claim_file[eg[1][0]]["arrival_delay"]
-                # else:
-                #     modified_p += claim_file[eg[0][0]]["arrival_delay"]
-                #     modified_p += claim_file[eg[1][0]]["deperture_delay"]
-                #
-                # eg[2]['weight'] += modified_p
             else:
                 # eg[0]:true, eg[1]:false
                 gp.node[eg[0]]['color'] = 'green'
-                # if eg[0][0]%2 == 0:
-                #     modified_p += claim_file[eg[0][0]]["deperture_delay"]
-                # else:
-                #     modified_p += claim_file[eg[0][0]]["arriva_delay"]
-                #
-                # eg[2]['weight'] += modified_p
         elif bolttt[eg[1][1]][eg[1][0]]:
             # eg[0]:false, eg[1]:true
             gp.node[eg[1]]['color'] = 'green'
-            # if eg[0][0]%2 == 0:
-            #     modified_p += claim_file[eg[1][0]]["deperture_delay"]
-            # else:
-            #     modified_p += claim_file[eg[1][0]]["arriva_delay"]
-            # eg[2]['weight'] += modified_p
 
         print  str(eg[0]) + " → " + str(eg[2]['weight']) + " → " + str(eg[1])
 

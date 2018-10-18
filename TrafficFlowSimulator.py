@@ -59,7 +59,8 @@ class TrafficFlowSimulator:
 
         for row in range(0,len(bolttt)):
             print bolttt[row]
-        return bolttt
+            
+        return bolttt,ttt
 
     def runWithDelayMatrix(self):
         delayall = []
