@@ -56,64 +56,7 @@ def dist(a, b):
     x1 = np.array(a, dtype=np.float32)
     x2 = np.array(b, dtype=np.float32)
     return np.linalg.norm(x1 - x2)
-"""
-def dissatisfaction(origin, destination, bolttt, ttt, claim_file):
-    dissatisfaction_weight = 0
 
-    origin_station_number = 0
-    destination_station_number = 0
-
-    if origin[0]%2 == 0:
-        origin_station_number = origin[0]/2
-    else:
-        origin_station_number = (origin[0]+1)/2
-
-    if destination[0]%2 == 0:
-        destination_station_number = destination[0]/2
-    else:
-        destination_station_number = (destination[0]+1)/2
-
-    if origin[1] == destination[1]:
-        #same train number.
-        if bolttt[origin[1]][origin[0]]:
-            if origin[0]%2 == 0:
-                #when origin node is the deperture node.
-                dissatisfaction_weight += claim_file[origin_station_number]["deperture_delay"]
-            else:
-                dissatisfaction_weight += claim_file[origin_station_number]["arrival_delay"]
-
-            if ttt[destination[1]][destination[0]] - ttt[origin[1]][origin[0]] > 0:
-                # corresponding to increase in stop time at the previous edge.
-                dissatisfaction_weight += claim_file[origin_station_number]["hold_time_increasement"]
-
-        if bolttt[destination[1]][destination[0]]:
-            if destination[0]%2 == 0:
-                #when origin node is the arrive node.
-                dissatisfaction_weight += claim_file[destination_station_number]["deperture_delay"]
-            else:
-                dissatisfaction_weight += claim_file[destination_station_number]["arrival_delay"]
-
-            if ttt[destination[1]][destination[0]] - ttt[origin[1]][origin[0]] > 0:
-                # corresponding to increase in running time at the previous edge.
-                dissatisfaction_weight += claim_file[origin_station_number]["running_time_increasement"]
-    else:
-        # diffrence train number.
-        if origin[0] == destination[0] and origin[0]%2 != 0:
-            # vertical connection between arrival nodes.
-            if bolttt[origin[1]][origin[0]] and bolttt[destination[1]][destination[0]]:
-                # * ← delayed
-                # |
-                # * ← delayed
-                if abs(ttt[origin[1]][origin[0]] - ttt[destination[1]][destination[0]]) != 0:
-                    dissatisfaction_weight += claim_file[destination_station_number]["frequency"]
-            elif bolttt[destination[1]][destination[0]]:
-                # @ ← not delayed
-                # |
-                # * ← delayed
-                dissatisfaction_weight += claim_file[destination_station_number]["frequency"]
-
-    return dissatisfaction_weight
-"""
 def exponential_dist(x,lam):
     return lam * np.e ** (-lam*x)
 
@@ -126,7 +69,7 @@ if __name__ == '__main__':
     gp = nx.grid_2d_graph(2*(num_of_station-1), num_of_train)
     gp = gp.to_directed()
 
-    add_cross_edge(gp, g_dim)
+    # add_cross_edge(gp, g_dim)
     remove_vertical_edge(gp, g_dim)
     remove_horizontal_edge(gp, g_dim)
 
@@ -206,24 +149,29 @@ if __name__ == '__main__':
             if eg[1] in cost_dict[eg[0]]:
                 eg[2]['negative_weight'] = -1*eg[2]['weight']
 
-    idcs = np.random.choice(len(gp.nodes()), int(5 * 5 * 0.2), replace=False)
-    # print idcs
+
+    # gp_rev = gp.reverse()
 
     weight = list(map(lambda x: exponential_dist(x,.35), range(len(corresponding_node_index))))
     weight = list(map(lambda x: x/sum(weight), weight))
     print weight
     print sum(weight)
+    while True:
+        rescheduled_train_num = np.random.choice(range(len(corresponding_node_index)), p = weight)
 
-    rescheduled_train_num = np.random.choice(range(len(corresponding_node_index)), p = weight)
+        weight2 = list(map(lambda x: exponential_dist(x,.35), range(len(corresponding_node_index[rescheduled_train_num]))))
+        weight2 = list(map(lambda x: x/sum(weight2), weight2))
+        print weight2
+        print sum(weight2)
 
-    weight2 = list(map(lambda x: exponential_dist(x,.35), range(len(corresponding_node_index[rescheduled_train_num]))))
-    weight2 = list(map(lambda x: x/sum(weight2), weight2))
-    print weight2
-    print sum(weight2)
+        rescheduled_node_num = np.random.choice(range(len(corresponding_node_index[rescheduled_train_num])), p = weight2)
 
-    rescheduled_node_num = np.random.choice(range(len(corresponding_node_index[rescheduled_train_num])), p = weight2)
+        if(corresponding_node_index[0][0] != corresponding_node_index[rescheduled_train_num][rescheduled_node_num] and rescheduled_train_num != 0):
+            break
+
     # スタート・ゴール・障害物を設定する
-    st, gl = (0,0), corresponding_node_index[rescheduled_train_num][rescheduled_node_num]
+    # st, gl = corresponding_node_index[rescheduled_train_num][rescheduled_node_num], corresponding_node_index[rescheduled_train_num][rescheduled_node_num]
+    st, gl = corresponding_node_index[0][0], corresponding_node_index[rescheduled_train_num][rescheduled_node_num]
 
     path = nx.astar_path(gp, st, gl, cost)
     length = nx.astar_path_length(gp, st, gl, cost)
@@ -264,7 +212,7 @@ if __name__ == '__main__':
     print"------------"
     print(path2[st][gl])
     print longest_length
-    gp.node[st]['color'] = 'green'
+    gp.node[st]['color'] = 'yellow'
     gp.node[gl]['color'] = 'red'
 
     #show the graph
@@ -281,86 +229,14 @@ if __name__ == '__main__':
 
     outputFile = 'recordedPERTdiagram-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.png'
     plt.savefig(outputFile)
-    # plt.show()
-
-    """
-    delayed_t = []
-    for r in range(len(bolttt)):
-        print bolttt[r]
-        print r, True in bolttt[r]
-        if True in bolttt[r]:
-            delayed_t.append(r)
-    print delayed_t
-
-    weight = list(map(lambda x: x - delayed_t[0], delayed_t))
-    weight = list(map(lambda x: exponential_dist(x,.35), weight))
-    weight = list(map(lambda x: x/sum(weight), weight))
-    print weight
-    print sum(weight)
-
-    rescheduled_train_num = np.random.choice(delayed_t, p = weight)
-
-    delayed_node = []
-    print len(bolttt[rescheduled_train_num])
-    for r in range(len(bolttt[rescheduled_train_num])):
-        print bolttt[rescheduled_train_num][r]
-        # print r, True in bolttt[rescheduled_train_num][r]
-        if True == bolttt[rescheduled_train_num][r]:
-            delayed_node.append(r)
-    print delayed_node
-
-    weight2 = list(map(lambda x: x - delayed_node[0], delayed_node))
-    weight2 = list(map(lambda x: exponential_dist(x,.35), weight2))
-    weight2 = list(map(lambda x: x/sum(weight2), weight2))
-    print weight2
-    print sum(weight2)
-
-    rescheduled_node_num = np.random.choice(delayed_node, p = weight2)
-
-    rt = []
-    rn = []
-    for i in range(100):
-        rescheduled_train_num = np.random.choice(delayed_t, p = weight)
-
-        delayed_node = []
-        print len(bolttt[rescheduled_train_num])
-        for r in range(len(bolttt[rescheduled_train_num])):
-            print bolttt[rescheduled_train_num][r]
-            # print r, True in bolttt[rescheduled_train_num][r]
-            if True == bolttt[rescheduled_train_num][r]:
-                delayed_node.append(r)
-        print delayed_node
-
-        weight2 = list(map(lambda x: x - delayed_node[0], delayed_node))
-        weight2 = list(map(lambda x: exponential_dist(x,.35), weight2))
-        weight2 = list(map(lambda x: x/sum(weight2), weight2))
-        print weight2
-        print sum(weight2)
-
-        rescheduled_node_num = np.random.choice(delayed_node, p = weight2)
-
-        rt.append(rescheduled_train_num)
-        rn.append(rescheduled_node_num)
-
-    print rt
-    print rn
-
-    fig = plt.figure()
-
-    ax = fig.add_subplot(1,1,1)
-
-    ax.scatter(rn,rt)
-
-    ax.set_title('first scatter plot')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-
-    fig.show()
-
-
-    result = []
-    for i in range(0,1000):
-        result.append(np.random.choice(delayed_t, p = weight))
-    plt.hist(result)
     plt.show()
-    """
+
+    sampled_edge = []
+    for index in range(len(path2[st][gl])):
+        if index != 0 and path2[st][gl][index-1][0] == path2[st][gl][index][0] :
+            smpld =[path2[st][gl][index-1],path2[st][gl][index]]
+            sampled_edge.append(smpld)
+
+    print sampled_edge
+    choiced = random.choice(sampled_edge)
+    print "→" + str(choiced)
