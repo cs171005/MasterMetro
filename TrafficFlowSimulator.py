@@ -48,31 +48,50 @@ class TrafficFlowSimulator:
         ttt = self.runWithDelayMatrix()
 
         bolttt = []
+        corresponding_node_index = []
         for row in range(0,len(ttt)):
             blt = []
-
+            crsn = []
             for col in range(0,len(ttt[row])):
-
                 if col%2 == 0:
                     #when origin node is the deperture node.
                     station_number = col/2
                     if ttt[row][col] >= claim_file[station_number]["deperture_delay"]:
                         blt.append(True)
+                        crsn.append((col,row))
                     else:
                         blt.append(False)
+
+                    if col != 0 and ttt[row][col]-ttt[row][col-1] >= claim_file[station_number]["running_time_increasement"]:
+                        print (col,row),"run"
+                        crsn.append((col,row))
+                        if not blt[col]:
+                            blt[col] = True
+
                 else:
                     #when origin node is the arrive node.
                     station_number = (col+1)/2
                     if ttt[row][col] >= claim_file[station_number]["arrival_delay"]:
                         blt.append(True)
+                        crsn.append((col,row))
                     else:
                         blt.append(False)
+
+                    if col != 0 and ttt[row][col]-ttt[row][col-1] >= claim_file[station_number]["hold_time_increasement"]:
+                        print (col,row),"hold"
+                        crsn.append((col,row))
+                        if not blt[col]:
+                            blt[col] = True
+                        
+
             bolttt.append(blt)
+            if crsn:
+                corresponding_node_index.append(crsn)
         """
         for row in range(0,len(bolttt)):
             print bolttt[row]
         """
-        return bolttt,ttt
+        return bolttt,ttt,corresponding_node_index
 
     def runWithDelayMatrix(self):
         delayall = []

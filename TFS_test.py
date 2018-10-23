@@ -14,12 +14,18 @@ num_of_station = 19
 claim_file = {}
 for st in range(num_of_station):
     # c_components = {"deperture_delay":42,"arrival_delay":42,"hold_time_increasement":44,"running_time_increasement":45,"frequency":46,"transit_connection":47}
-    c_components = {"deperture_delay":180,"arrival_delay":180}
+    c_components = {"deperture_delay":180,"arrival_delay":180,"hold_time_increasement":30,"running_time_increasement":90}
     claim_file[st] = c_components
 
-bool,raw = TFS.runWithDelayDissatisfactionBool(claim_file)
+bool,raw,ccc = TFS.runWithDelayDissatisfactionBool(claim_file)
 
-print bool
+for bl in range(len(bool)):
+    print bool[bl]
+
+for cc in range(len(ccc)):
+    print ccc[cc]
+
+
 """
 delayed_t = []
 for r in range(len(bool)):

@@ -163,7 +163,7 @@ if __name__ == '__main__':
     claim_file = {}
     for st in range(num_of_station):
         # c_components = {"deperture_delay":42,"arrival_delay":42,"hold_time_increasement":44,"running_time_increasement":45,"frequency":46,"transit_connection":47}
-        c_components = {"deperture_delay":180,"arrival_delay":180}
+        c_components = {"deperture_delay":180,"arrival_delay":180,"hold_time_increasement":30,"running_time_increasement":90}
         claim_file[st] = c_components
 
     ddd = 1.0
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     nx.set_edge_attributes(gp, -1*ddd, 'negative_weight')
 
     # criterior = 180
-    bolttt,rawttt = TFS.runWithDelayDissatisfactionBool(claim_file)
+    bolttt,rawttt,corresponding_node_index = TFS.runWithDelayDissatisfactionBool(claim_file)
     # print len(bolttt[0]),len(bolttt)
 
     print len(bolttt), len(bolttt[0])
@@ -209,10 +209,21 @@ if __name__ == '__main__':
     idcs = np.random.choice(len(gp.nodes()), int(5 * 5 * 0.2), replace=False)
     # print idcs
 
+    weight = list(map(lambda x: exponential_dist(x,.35), range(len(corresponding_node_index))))
+    weight = list(map(lambda x: x/sum(weight), weight))
+    print weight
+    print sum(weight)
+
+    rescheduled_train_num = np.random.choice(range(len(corresponding_node_index)), p = weight)
+
+    weight2 = list(map(lambda x: exponential_dist(x,.35), range(len(corresponding_node_index[rescheduled_train_num]))))
+    weight2 = list(map(lambda x: x/sum(weight2), weight2))
+    print weight2
+    print sum(weight2)
+
+    rescheduled_node_num = np.random.choice(range(len(corresponding_node_index[rescheduled_train_num])), p = weight2)
     # スタート・ゴール・障害物を設定する
-    st, gl, obs = (0,0), (30,60), [list(gp.nodes())[i] for i in idcs[2:]]
-    # st, gl, obs = (0,0), (np.random.randint(g_dim[0]),np.random.randint(g_dim[1])), [list(gp.nodes())[i] for i in idcs[2:]]
-    obs = [list(gp.nodes())[i] for i in idcs[2:]]
+    st, gl = (0,0), corresponding_node_index[rescheduled_train_num][rescheduled_node_num]
 
     path = nx.astar_path(gp, st, gl, cost)
     length = nx.astar_path_length(gp, st, gl, cost)
@@ -255,8 +266,6 @@ if __name__ == '__main__':
     print longest_length
     gp.node[st]['color'] = 'green'
     gp.node[gl]['color'] = 'red'
-    for o in obs:
-        gp.node[o]['color'] = 'black'
 
     #show the graph
     pos = dict((n, n) for n in gp.nodes())
@@ -273,7 +282,7 @@ if __name__ == '__main__':
     outputFile = 'recordedPERTdiagram-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.png'
     plt.savefig(outputFile)
     # plt.show()
-    
+
     """
     delayed_t = []
     for r in range(len(bolttt)):
