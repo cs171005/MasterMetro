@@ -56,7 +56,7 @@ def dist(a, b):
     x1 = np.array(a, dtype=np.float32)
     x2 = np.array(b, dtype=np.float32)
     return np.linalg.norm(x1 - x2)
-
+"""
 def dissatisfaction(origin, destination, bolttt, ttt, claim_file):
     dissatisfaction_weight = 0
 
@@ -113,7 +113,9 @@ def dissatisfaction(origin, destination, bolttt, ttt, claim_file):
                 dissatisfaction_weight += claim_file[destination_station_number]["frequency"]
 
     return dissatisfaction_weight
-
+"""
+def exponential_dist(x,lam):
+    return lam * np.e ** (-lam*x)
 
 if __name__ == '__main__':
     TFS = TrafficFlowSimulator()
@@ -160,15 +162,16 @@ if __name__ == '__main__':
 
     claim_file = {}
     for st in range(num_of_station):
-        c_components = {"deperture_delay":42,"arrival_delay":42,"hold_time_increasement":44,"running_time_increasement":45,"frequency":46,"transit_connection":47}
+        # c_components = {"deperture_delay":42,"arrival_delay":42,"hold_time_increasement":44,"running_time_increasement":45,"frequency":46,"transit_connection":47}
+        c_components = {"deperture_delay":180,"arrival_delay":180}
         claim_file[st] = c_components
 
     ddd = 1.0
     nx.set_edge_attributes(gp, ddd, 'weight')
     nx.set_edge_attributes(gp, -1*ddd, 'negative_weight')
 
-    criterior = 180
-    bolttt,rawttt = TFS.runWithDelayDissatisfactionBool(criterior)
+    # criterior = 180
+    bolttt,rawttt = TFS.runWithDelayDissatisfactionBool(claim_file)
     # print len(bolttt[0]),len(bolttt)
 
     print len(bolttt), len(bolttt[0])
@@ -180,8 +183,8 @@ if __name__ == '__main__':
 
         # print eg
         print eg[0], eg[1], eg[2]['weight']
-        print dissatisfaction(eg[0], eg[1], bolttt, rawttt, claim_file)
-        eg[2]['weight'] += dissatisfaction(eg[0], eg[1], bolttt, rawttt, claim_file)
+        # print dissatisfaction(eg[0], eg[1], bolttt, rawttt, claim_file)
+        # eg[2]['weight'] += dissatisfaction(eg[0], eg[1], bolttt, rawttt, claim_file)
         penalty = 0.0
         modified_p = 0.0
         if bolttt[eg[0][1]][eg[0][0]]:
@@ -269,4 +272,86 @@ if __name__ == '__main__':
 
     outputFile = 'recordedPERTdiagram-'+datetime.datetime.now().strftime('%y%m%d-%H%M%S')+'.png'
     plt.savefig(outputFile)
+    # plt.show()
+    
+    """
+    delayed_t = []
+    for r in range(len(bolttt)):
+        print bolttt[r]
+        print r, True in bolttt[r]
+        if True in bolttt[r]:
+            delayed_t.append(r)
+    print delayed_t
+
+    weight = list(map(lambda x: x - delayed_t[0], delayed_t))
+    weight = list(map(lambda x: exponential_dist(x,.35), weight))
+    weight = list(map(lambda x: x/sum(weight), weight))
+    print weight
+    print sum(weight)
+
+    rescheduled_train_num = np.random.choice(delayed_t, p = weight)
+
+    delayed_node = []
+    print len(bolttt[rescheduled_train_num])
+    for r in range(len(bolttt[rescheduled_train_num])):
+        print bolttt[rescheduled_train_num][r]
+        # print r, True in bolttt[rescheduled_train_num][r]
+        if True == bolttt[rescheduled_train_num][r]:
+            delayed_node.append(r)
+    print delayed_node
+
+    weight2 = list(map(lambda x: x - delayed_node[0], delayed_node))
+    weight2 = list(map(lambda x: exponential_dist(x,.35), weight2))
+    weight2 = list(map(lambda x: x/sum(weight2), weight2))
+    print weight2
+    print sum(weight2)
+
+    rescheduled_node_num = np.random.choice(delayed_node, p = weight2)
+
+    rt = []
+    rn = []
+    for i in range(100):
+        rescheduled_train_num = np.random.choice(delayed_t, p = weight)
+
+        delayed_node = []
+        print len(bolttt[rescheduled_train_num])
+        for r in range(len(bolttt[rescheduled_train_num])):
+            print bolttt[rescheduled_train_num][r]
+            # print r, True in bolttt[rescheduled_train_num][r]
+            if True == bolttt[rescheduled_train_num][r]:
+                delayed_node.append(r)
+        print delayed_node
+
+        weight2 = list(map(lambda x: x - delayed_node[0], delayed_node))
+        weight2 = list(map(lambda x: exponential_dist(x,.35), weight2))
+        weight2 = list(map(lambda x: x/sum(weight2), weight2))
+        print weight2
+        print sum(weight2)
+
+        rescheduled_node_num = np.random.choice(delayed_node, p = weight2)
+
+        rt.append(rescheduled_train_num)
+        rn.append(rescheduled_node_num)
+
+    print rt
+    print rn
+
+    fig = plt.figure()
+
+    ax = fig.add_subplot(1,1,1)
+
+    ax.scatter(rn,rt)
+
+    ax.set_title('first scatter plot')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+
+    fig.show()
+
+
+    result = []
+    for i in range(0,1000):
+        result.append(np.random.choice(delayed_t, p = weight))
+    plt.hist(result)
     plt.show()
+    """

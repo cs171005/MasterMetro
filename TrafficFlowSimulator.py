@@ -44,22 +44,34 @@ class TrafficFlowSimulator:
         for site in self.LineState.state:
         	site.siteHopProbUpdate(self.LineState.hopProb)
 
-    def runWithDelayDissatisfactionBool(self,criterior):
+    def runWithDelayDissatisfactionBool(self, claim_file):
         ttt = self.runWithDelayMatrix()
 
         bolttt = []
         for row in range(0,len(ttt)):
             blt = []
-            for col in range(0,len(ttt[row])):
-                if ttt[row][col] >= criterior:
-                    blt.append(True)
-                else:
-                    blt.append(False)
-            bolttt.append(blt)
 
+            for col in range(0,len(ttt[row])):
+
+                if col%2 == 0:
+                    #when origin node is the deperture node.
+                    station_number = col/2
+                    if ttt[row][col] >= claim_file[station_number]["deperture_delay"]:
+                        blt.append(True)
+                    else:
+                        blt.append(False)
+                else:
+                    #when origin node is the arrive node.
+                    station_number = (col+1)/2
+                    if ttt[row][col] >= claim_file[station_number]["arrival_delay"]:
+                        blt.append(True)
+                    else:
+                        blt.append(False)
+            bolttt.append(blt)
+        """
         for row in range(0,len(bolttt)):
             print bolttt[row]
-            
+        """
         return bolttt,ttt
 
     def runWithDelayMatrix(self):
@@ -78,10 +90,10 @@ class TrafficFlowSimulator:
         		d_row.append(d)
         		delayall.append(d)
         	d_table.append(d_row)
-
+        """
         for i in range(len(d_table)):
         	print d_table[i]
-
+        """
         return d_table
 
 
